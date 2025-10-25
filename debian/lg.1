@@ -1,0 +1,44 @@
+.TH lg 1 "October 2025" "lg 0.1.0" "User Commands"
+.SH NAME
+lg \- log any command's output and metadata
+.SH SYNOPSIS
+.B lg
+[\fIOPTIONS\fR] \fICOMMAND\fR [\fIARGS...\fR]
+.SH DESCRIPTION
+Prefix any command with
+.B lg
+to tee its output to the terminal and also write a timestamped log file.
+By default the log file is written to the current directory as
+.I <command>_<YYYY-MM-DD>_<HH-mm-ss>.log
+.PP
+Configuration is read from
+.I ~/.lg
+in TOML format.
+.SH OPTIONS
+.TP
+.B \-\-output DIR
+Override output directory (otherwise uses config or the current directory).
+.TP
+.B \-\-filename-template STR
+Set the filename template. Placeholders: {cmd}, {args}, {date}, {time}, {ts}, {exit_code}, {hostname}, {cwd}.
+.TP
+.B \-\-include-args, \-a
+Include command arguments in the filename.
+.TP
+.B \-\-split-streams
+Write two files ending with .out.log and .err.log.
+.TP
+.B \-\-compress [none|gz]
+Compress logs with gzip if 'gz' is specified.
+.TP
+.B \-\-no-tee
+Do not print the wrapped command's output to the terminal (still logs to file).
+.TP
+.B \-\-help
+Show help.
+.SH EXIT STATUS
+Returns the exit status of the wrapped command.
+.SH FILES
+~/.lg \- configuration file (TOML).
+.SH AUTHOR
+Dmitry Bykov <gearbatyan@gmail.com>

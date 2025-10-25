@@ -1,0 +1,6 @@
+#!/usr/bin/make -f
+# Export needed for dh-cargo
+export DEB_CARGO_CRATE=lg
+
+%:
+	dh $@ --buildsystem=cargo
