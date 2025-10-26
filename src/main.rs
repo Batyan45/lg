@@ -9,7 +9,6 @@ use chrono::Local;
 use clap::{ArgAction, Parser};
 use flate2::write::GzEncoder;
 use flate2::Compression;
-use home::home_dir;
 use hostname::get as get_hostname;
 use once_cell::sync::Lazy;
 use serde::Deserialize;
@@ -329,7 +328,7 @@ async fn run() -> Result<(i32, PathBuf)> {
 }
 
 fn ensure_config_file() -> Option<PathBuf> {
-    let home = home_dir()?;
+    let home = simple_home_dir()?;
     let path = home.join(".lg");
     if !path.exists() {
         if let Err(err) = fs::write(&path, DEFAULT_CONFIG_TEMPLATE) {
@@ -338,6 +337,29 @@ fn ensure_config_file() -> Option<PathBuf> {
         }
     }
     Some(path)
+}
+
+fn simple_home_dir() -> Option<PathBuf> {
+    // Unix-like: $HOME
+    if let Ok(h) = std::env::var("HOME") {
+        if !h.is_empty() {
+            return Some(PathBuf::from(h));
+        }
+    }
+    // Windows fallbacks
+    if cfg!(windows) {
+        if let Ok(p) = std::env::var("USERPROFILE") {
+            if !p.is_empty() {
+                return Some(PathBuf::from(p));
+            }
+        }
+        let drive = std::env::var("HOMEDRIVE").unwrap_or_default();
+        let path = std::env::var("HOMEPATH").unwrap_or_default();
+        if !drive.is_empty() && !path.is_empty() {
+            return Some(PathBuf::from(format!("{}{}", drive, path)));
+        }
+    }
+    None
 }
 
 fn load_config() -> Result<Config> {

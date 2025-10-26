@@ -4,3 +4,40 @@ export DEB_CARGO_CRATE=lg
 
 %:
 	dh $@ --buildsystem=cargo
+
+# Prepare vendored dependencies for offline builds on Launchpad.
+# If debian/vendor.tar.xz is present, unpack it and configure Cargo
+# to use the vendored sources offline. This avoids network access.
+override_dh_auto_configure:
+	@if [ -f debian/vendor.tar.xz ]; then \
+	  echo "Using vendored dependencies from debian/vendor.tar.xz"; \
+	  tar -xf debian/vendor.tar.xz -C .; \
+	  mkdir -p .cargo; \
+	  printf "[source.crates-io]\nreplace-with = \"vendored-sources\"\n\n[source.vendored-sources]\ndirectory = \"vendor\"\n\n[net]\noffline = true\n" > .cargo/config.toml; \
+	  if [ -f Cargo.lock ] && grep -q '^version = 4$$' Cargo.lock; then \
+	    echo "Downgrading Cargo.lock format v4 -> v3 for Cargo 1.75"; \
+	    sed -i 's/^version = 4$$/version = 3/' Cargo.lock; \
+	  fi; \
+	  # Prune problematic crates that require edition 2024 to avoid parsing failures on Cargo 1.75
+	  rm -rf vendor/home; \
+	else \
+	  if [ -z "$$ALLOW_ONLINE" ]; then \
+	    echo "ERROR: debian/vendor.tar.xz not found and ALLOW_ONLINE not set."; \
+	    echo "Run: debian/prepare-vendor.sh (requires network)"; \
+	    exit 1; \
+	  else \
+	    echo "No vendor archive; proceeding with online build (ALLOW_ONLINE=1)"; \
+	  fi; \
+	fi
+
+override_dh_auto_build:
+	cargo build --release --locked --verbose
+
+override_dh_auto_test:
+	# No tests; skip
+	true
+
+override_dh_auto_clean:
+	# Clean cargo target and local vendor/config created during build
+	rm -rf vendor .cargo
+	dh_auto_clean

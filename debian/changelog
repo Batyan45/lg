@@ -1,3 +1,45 @@
+lg (1.0.0-4~ppa1) noble; urgency=medium
+
+  * Drop home crate; prune vendor for Cargo 1.75
+
+ -- Dmitry Bykov <gearbatyan@gmail.com>  Sun, 26 Oct 2025 13:59:27 +0700
+
+lg (1.0.0-3~ppa1) noble; urgency=medium
+
+  * Fix build on Rust 1.75: vendor + lock v3
+
+ -- Dmitry Bykov <gearbatyan@gmail.com>  Sun, 26 Oct 2025 13:50:24 +0700
+
+lg (1.0.0-2~ppa1) noble; urgency=medium
+
+  * Vendor crates for offline build
+
+ -- Dmitry Bykov <gearbatyan@gmail.com>  Sun, 26 Oct 2025 13:44:36 +0700
+
+lg (1.0.0-1~ppa1) noble; urgency=medium
+
+  * PPA build for Noble
+
+ -- Dmitry Bykov <gearbatyan@gmail.com>  Sun, 26 Oct 2025 13:34:06 +0700
+
+lg (1.0.0-1~ppa11~ppa12) noble; urgency=medium
+
+  * PPA build for Noble
+
+ -- Dmitry Bykov <gearbatyan@gmail.com>  Sun, 26 Oct 2025 13:30:01 +0700
+
+lg (1.0.0-1~ppa11~ppa11) noble; urgency=medium
+
+  * PPA build for Noble
+
+ -- Dmitry Bykov <gearbatyan@gmail.com>  Sun, 26 Oct 2025 13:29:01 +0700
+
+lg (1.0.0-1~ppa11) noble; urgency=medium
+
+  * PPA build for Noble
+
+ -- Lenovo <dbykov@Lenovo.>  Sun, 26 Oct 2025 13:26:55 +0700
+
 lg (1.0.0-1) unstable; urgency=medium
 
   * Upstream stable release 1.0.0.

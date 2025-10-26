@@ -6,3 +6,4 @@ Cargo.lock
 *.buildinfo
 *.changes
 *.log
+debian/vendor.tar.xz
