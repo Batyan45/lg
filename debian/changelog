@@ -40,6 +40,13 @@ lg (1.0.0-1~ppa11) noble; urgency=medium
 
  -- Lenovo <dbykov@Lenovo.>  Sun, 26 Oct 2025 13:26:55 +0700
 
+lg (1.0.1-1~ppa1) noble; urgency=medium
+
+  * Upstream 1.0.1: drop home crate to avoid edition-2024 requirement on
+    Launchpad's Cargo 1.75; add vendored offline build support.
+
+ -- Dmitry Bykov <gearbatyan@gmail.com>  Sun, 26 Oct 2025 13:55:00 +0000
+
 lg (1.0.0-1) unstable; urgency=medium
 
   * Upstream stable release 1.0.0.
