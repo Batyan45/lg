@@ -1,12 +1,12 @@
-# Example ~/.lg (TOML)
 output_dir = ""                 # default: current directory
-include_args_in_name = false    # default: false
-include_full_args = true        # default: true
-sanitize_filename = true        # default: true
+include_args_in_name = false
+include_full_args = true
+sanitize_filename = true
 filename_template = "{cmd}_{date}_{time}.log"
 time_format = "%H-%M-%S"
 date_format = "%Y-%m-%d"
 timestamp_each_line = true
+plain_lines = false             # write lines without prefixes when true
 combine_streams = true
 split_streams = false
 tee = true

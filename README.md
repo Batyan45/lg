@@ -29,7 +29,7 @@ You can change behavior via a config file at `~/.lg` (TOML). See [Configuration]
 Requirements: Rust (stable) and Cargo.
 
 ```bash
-git clone https://example.com/lg.git
+git clone https://github.com/Batyan45/lg.git
 cd lg
 cargo build --release
 sudo install -Dm755 target/release/lg /usr/local/bin/lg
@@ -59,6 +59,9 @@ Examples:
 lg echo "hello"
 lg python script.py --flag
 lg --split-streams --compress gz -- make test
+
+# Keep log lines untouched (no timestamps or [STDOUT]/[STDERR]):
+lg --plain-lines -- make test
 ```
 
 ### Exit code passthrough
@@ -66,7 +69,7 @@ lg --split-streams --compress gz -- make test
 
 ## Configuration
 
-Create `~/.lg` (TOML). All keys are optional. Defaults are shown below.
+`lg` will automatically create `~/.lg` (TOML) with sensible defaults the first time you run it, so you can tweak it immediately. All keys are optional. Defaults are shown below.
 
 ```toml
 # Where to write logs. If unset, current directory is used.
@@ -92,6 +95,9 @@ Create `~/.lg` (TOML). All keys are optional. Defaults are shown below.
 
 # Write timestamp per logged line.
 # timestamp_each_line = true
+
+# Write log lines exactly as emitted (no timestamps or stream labels).
+# plain_lines = false
 
 # Combine stdout and stderr into a single log file with stream markers.
 # If false and split_streams=true, separate .out.log and .err.log are written.

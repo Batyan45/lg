@@ -13,7 +13,9 @@ By default the log file is written to the current directory as
 .PP
 Configuration is read from
 .I ~/.lg
-in TOML format.
+in TOML format and the file is created automatically the first time you run
+.B lg
+if it does not exist.
 .SH OPTIONS
 .TP
 .B \-\-output DIR
@@ -27,6 +29,9 @@ Include command arguments in the filename.
 .TP
 .B \-\-split-streams
 Write two files ending with .out.log and .err.log.
+.TP
+.B \-\-plain-lines
+Write log lines exactly as emitted (no timestamps or stream identifiers).
 .TP
 .B \-\-compress [none|gz]
 Compress logs with gzip if 'gz' is specified.

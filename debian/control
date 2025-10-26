@@ -1,7 +1,7 @@
 Source: lg
 Section: utils
 Priority: optional
-Maintainer: Your Name <you@example.com>
+Maintainer: Dmitry Bykov <gearbatyan@gmail.com>
 Build-Depends: debhelper-compat (= 13), dh-cargo, rustc, cargo
 Standards-Version: 4.7.0
 Homepage: https://github.com/Batyan45/lg

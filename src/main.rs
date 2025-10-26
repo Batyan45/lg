@@ -1,4 +1,3 @@
-
 // lg: a tiny universal command logger
 // Usage: lg <command> [args...]
 // - Writes timestamped logs into the current directory by default.
@@ -28,10 +27,12 @@ static DEFAULT_FILENAME_TEMPLATE: &str = "{cmd}_{date}_{time}.log";
 static DEFAULT_DATE_FORMAT: &str = "%Y-%m-%d";
 static DEFAULT_TIME_FORMAT: &str = "%H-%M-%S";
 static DEFAULT_LINE_TIME_FORMAT: &str = "%H:%M:%S%.3f";
+static DEFAULT_CONFIG_TEMPLATE: &str = include_str!("../examples/lg.example.toml");
 
 // Cache hostname once
 static HOSTNAME: Lazy<String> = Lazy::new(|| {
-    get_hostname().ok()
+    get_hostname()
+        .ok()
         .and_then(|o| o.into_string().ok())
         .unwrap_or_else(|| "unknown".into())
 });
@@ -47,6 +48,7 @@ struct Config {
     date_format: String,
     time_format: String,
     timestamp_each_line: bool,
+    plain_lines: bool,
     combine_streams: bool,
     split_streams: bool,
     tee: bool,
@@ -62,7 +64,9 @@ enum Compress {
     Gz,
 }
 
-fn default_compress() -> Compress { Compress::None }
+fn default_compress() -> Compress {
+    Compress::None
+}
 
 impl Default for Config {
     fn default() -> Self {
@@ -75,6 +79,7 @@ impl Default for Config {
             date_format: DEFAULT_DATE_FORMAT.into(),
             time_format: DEFAULT_TIME_FORMAT.into(),
             timestamp_each_line: true,
+            plain_lines: false,
             combine_streams: true,
             split_streams: false,
             tee: true,
@@ -108,6 +113,10 @@ struct Cli {
     #[arg(long, action = ArgAction::SetTrue)]
     split_streams: bool,
 
+    /// Write logged lines without timestamps or stream markers
+    #[arg(long, action = ArgAction::SetTrue)]
+    plain_lines: bool,
+
     /// Compress logs: none|gz
     #[arg(long)]
     compress: Option<String>,
@@ -135,10 +144,22 @@ async fn run() -> Result<(i32, PathBuf)> {
     let mut cfg = load_config()?;
 
     // Apply CLI overrides
-    if let Some(out) = cli.output { cfg.output_dir = Some(out); }
-    if let Some(tpl) = cli.filename_template { cfg.filename_template = tpl; }
-    if cli.include_args { cfg.include_args_in_name = true; }
-    if cli.split_streams { cfg.split_streams = true; cfg.combine_streams = false; }
+    if let Some(out) = cli.output {
+        cfg.output_dir = Some(out);
+    }
+    if let Some(tpl) = cli.filename_template {
+        cfg.filename_template = tpl;
+    }
+    if cli.include_args {
+        cfg.include_args_in_name = true;
+    }
+    if cli.split_streams {
+        cfg.split_streams = true;
+        cfg.combine_streams = false;
+    }
+    if cli.plain_lines {
+        cfg.plain_lines = true;
+    }
     if let Some(c) = cli.compress.as_deref() {
         cfg.compress = match c {
             "gz" => Compress::Gz,
@@ -149,7 +170,9 @@ async fn run() -> Result<(i32, PathBuf)> {
             }
         };
     }
-    if cli.no_tee { cfg.tee = false; }
+    if cli.no_tee {
+        cfg.tee = false;
+    }
 
     // Command + args
     let cmd = cli.cmd.first().unwrap().clone();
@@ -203,7 +226,13 @@ async fn run() -> Result<(i32, PathBuf)> {
             log_path = out_dir.join(&base_name);
         }
         if cfg.compress == Compress::Gz && !log_path.to_string_lossy().ends_with(".gz") {
-            log_path.set_extension(format!("{}gz", log_path.extension().and_then(|e| e.to_str()).unwrap_or("log.")));
+            log_path.set_extension(format!(
+                "{}gz",
+                log_path
+                    .extension()
+                    .and_then(|e| e.to_str())
+                    .unwrap_or("log.")
+            ));
         }
     }
 
@@ -211,42 +240,62 @@ async fn run() -> Result<(i32, PathBuf)> {
 
     // Write header and run process
     if cfg.split_streams {
-        let (exit, out_path, err_path) = run_and_log_split(&cfg, &cmd, &args, &cwd, &log_path, &cmd_str, &args_str, &date_s, &time_s).await?;
+        let (exit, out_path, err_path) = run_and_log_split(
+            &cfg, &cmd, &args, &cwd, &log_path, &cmd_str, &args_str, &date_s, &time_s,
+        )
+        .await?;
         exit_code = exit;
         if let Some(tpl) = final_template {
             // We need to rename both files to include exit_code if requested.
-            let out_final = out_dir.join(render_template(
-                &tpl,
-                &cmd_str,
-                &args_str,
-                &date_s,
-                &time_s,
-                &ts_s,
-                Some(exit_code),
-                &HOSTNAME,
-                &cwd_s,
-                cfg.sanitize_filename,
-                cfg.include_args_in_name,
-            ) + ".out.log" + if cfg.compress == Compress::Gz { ".gz" } else { "" });
-            let err_final = out_dir.join(render_template(
-                &tpl,
-                &cmd_str,
-                &args_str,
-                &date_s,
-                &time_s,
-                &ts_s,
-                Some(exit_code),
-                &HOSTNAME,
-                &cwd_s,
-                cfg.sanitize_filename,
-                cfg.include_args_in_name,
-            ) + ".err.log" + if cfg.compress == Compress::Gz { ".gz" } else { "" });
+            let out_final = out_dir.join(
+                render_template(
+                    &tpl,
+                    &cmd_str,
+                    &args_str,
+                    &date_s,
+                    &time_s,
+                    &ts_s,
+                    Some(exit_code),
+                    &HOSTNAME,
+                    &cwd_s,
+                    cfg.sanitize_filename,
+                    cfg.include_args_in_name,
+                ) + ".out.log"
+                    + if cfg.compress == Compress::Gz {
+                        ".gz"
+                    } else {
+                        ""
+                    },
+            );
+            let err_final = out_dir.join(
+                render_template(
+                    &tpl,
+                    &cmd_str,
+                    &args_str,
+                    &date_s,
+                    &time_s,
+                    &ts_s,
+                    Some(exit_code),
+                    &HOSTNAME,
+                    &cwd_s,
+                    cfg.sanitize_filename,
+                    cfg.include_args_in_name,
+                ) + ".err.log"
+                    + if cfg.compress == Compress::Gz {
+                        ".gz"
+                    } else {
+                        ""
+                    },
+            );
 
             let _ = fs::rename(out_path, out_final);
             let _ = fs::rename(err_path, err_final);
         }
     } else {
-        let (exit, path_written) = run_and_log_combined(&cfg, &cmd, &args, &cwd, &log_path, &cmd_str, &args_str, &date_s, &time_s).await?;
+        let (exit, path_written) = run_and_log_combined(
+            &cfg, &cmd, &args, &cwd, &log_path, &cmd_str, &args_str, &date_s, &time_s,
+        )
+        .await?;
         exit_code = exit;
         if let Some(tpl) = final_template {
             // Compute final name with exit code and rename
@@ -265,7 +314,9 @@ async fn run() -> Result<(i32, PathBuf)> {
             );
             let mut final_path = out_dir.join(final_name);
             // Preserve compression extension
-            if path_written.to_string_lossy().ends_with(".gz") && !final_path.to_string_lossy().ends_with(".gz") {
+            if path_written.to_string_lossy().ends_with(".gz")
+                && !final_path.to_string_lossy().ends_with(".gz")
+            {
                 final_path.set_extension("log.gz");
             } else if std::path::Path::new(&final_path).extension().is_none() {
                 final_path.set_extension("log");
@@ -277,15 +328,25 @@ async fn run() -> Result<(i32, PathBuf)> {
     Ok((exit_code, log_path))
 }
 
+fn ensure_config_file() -> Option<PathBuf> {
+    let home = home_dir()?;
+    let path = home.join(".lg");
+    if !path.exists() {
+        if let Err(err) = fs::write(&path, DEFAULT_CONFIG_TEMPLATE) {
+            eprintln!("lg: failed to create default config at {:?}: {}", path, err);
+            return Some(path);
+        }
+    }
+    Some(path)
+}
+
 fn load_config() -> Result<Config> {
-    let path = home_dir().map(|p| p.join(".lg"));
     let mut cfg = Config::default();
-    if let Some(p) = path {
+    if let Some(p) = ensure_config_file() {
         if p.exists() {
-            let data = fs::read_to_string(&p)
-                .with_context(|| format!("reading config {:?}", p))?;
-            let file_cfg: Config = toml::from_str(&data)
-                .with_context(|| format!("parsing config TOML {:?}", p))?;
+            let data = fs::read_to_string(&p).with_context(|| format!("reading config {:?}", p))?;
+            let file_cfg: Config =
+                toml::from_str(&data).with_context(|| format!("parsing config TOML {:?}", p))?;
             cfg = Config { ..file_cfg };
         }
     }
@@ -343,7 +404,11 @@ fn render_template(
     sanitize: bool,
     include_args_in_name: bool,
 ) -> String {
-    let mut args_used = if include_args_in_name { args.to_string() } else { String::new() };
+    let mut args_used = if include_args_in_name {
+        args.to_string()
+    } else {
+        String::new()
+    };
     if sanitize {
         args_used = sanitize_component(&args_used);
     }
@@ -364,7 +429,9 @@ fn render_template(
         s = s.replace("{exit_code}", "NA");
     }
     s = s.replace("..", ".");
-    while s.contains("__") { s = s.replace("__", "_"); }
+    while s.contains("__") {
+        s = s.replace("__", "_");
+    }
     s.trim_matches(|c| c == '_' || c == '.').to_string()
 }
 
@@ -379,12 +446,19 @@ async fn run_and_log_combined(
     date_s: &str,
     time_s: &str,
 ) -> Result<(i32, PathBuf)> {
-
     // Open writer (plain or gz)
     let (mut writer_box, final_path) = open_writer(cfg, log_path)?;
 
     // Header
-    write_header(&mut *writer_box, cfg, cmd_str, args_str, cwd, date_s, time_s)?;
+    write_header(
+        &mut *writer_box,
+        cfg,
+        cmd_str,
+        args_str,
+        cwd,
+        date_s,
+        time_s,
+    )?;
 
     // Spawn process
     let mut child = Command::new(cmd)
@@ -403,6 +477,7 @@ async fn run_and_log_combined(
 
     let tee = cfg.tee;
     let ts_each = cfg.timestamp_each_line;
+    let plain_lines = cfg.plain_lines;
 
     let mut out_done = false;
     let mut err_done = false;
@@ -414,7 +489,7 @@ async fn run_and_log_combined(
                 match line? {
                     Some(l) => {
                         if tee { println!("{}", l); }
-                        write_line(&mut *writer_box, "STDOUT", &l, ts_each)?;
+                        write_line(&mut *writer_box, "STDOUT", &l, ts_each, plain_lines)?;
                     }
                     None => { out_done = true; }
                 }
@@ -423,7 +498,7 @@ async fn run_and_log_combined(
                 match line? {
                     Some(l) => {
                         if tee { eprintln!("{}", l); }
-                        write_line(&mut *writer_box, "STDERR", &l, ts_each)?;
+                        write_line(&mut *writer_box, "STDERR", &l, ts_each, plain_lines)?;
                     }
                     None => { err_done = true; }
                 }
@@ -434,8 +509,12 @@ async fn run_and_log_combined(
 
     let status = child.wait().await?;
     let code = status.code().unwrap_or(1);
-    writeln!(&mut *writer_box, "
-[exit_code] {}", code)?;
+    writeln!(
+        &mut *writer_box,
+        "
+[exit_code] {}",
+        code
+    )?;
     writer_box.flush()?;
 
     Ok((code, final_path))
@@ -452,7 +531,6 @@ async fn run_and_log_split(
     date_s: &str,
     time_s: &str,
 ) -> Result<(i32, PathBuf, PathBuf)> {
-
     // Paths
     let mut out_path = base_path.with_extension("out.log");
     let mut err_path = base_path.with_extension("err.log");
@@ -465,8 +543,24 @@ async fn run_and_log_split(
     let (mut err_writer, err_final) = open_writer(cfg, &err_path)?;
 
     // Header
-    write_header(&mut *out_writer, cfg, cmd_str, args_str, cwd, date_s, time_s)?;
-    write_header(&mut *err_writer, cfg, cmd_str, args_str, cwd, date_s, time_s)?;
+    write_header(
+        &mut *out_writer,
+        cfg,
+        cmd_str,
+        args_str,
+        cwd,
+        date_s,
+        time_s,
+    )?;
+    write_header(
+        &mut *err_writer,
+        cfg,
+        cmd_str,
+        args_str,
+        cwd,
+        date_s,
+        time_s,
+    )?;
 
     let mut child = Command::new(cmd)
         .args(args)
@@ -484,6 +578,7 @@ async fn run_and_log_split(
 
     let tee = cfg.tee;
     let ts_each = cfg.timestamp_each_line;
+    let plain_lines = cfg.plain_lines;
 
     let mut out_done = false;
     let mut err_done = false;
@@ -494,7 +589,7 @@ async fn run_and_log_split(
                 match line? {
                     Some(l) => {
                         if tee { println!("{}", l); }
-                        write_line(&mut *out_writer, "STDOUT", &l, ts_each)?;
+                        write_line(&mut *out_writer, "STDOUT", &l, ts_each, plain_lines)?;
                     }
                     None => { out_done = true; }
                 }
@@ -503,7 +598,7 @@ async fn run_and_log_split(
                 match line? {
                     Some(l) => {
                         if tee { eprintln!("{}", l); }
-                        write_line(&mut *err_writer, "STDERR", &l, ts_each)?;
+                        write_line(&mut *err_writer, "STDERR", &l, ts_each, plain_lines)?;
                     }
                     None => { err_done = true; }
                 }
@@ -514,20 +609,38 @@ async fn run_and_log_split(
 
     let status = child.wait().await?;
     let code = status.code().unwrap_or(1);
-    writeln!(&mut *out_writer, "
-[exit_code] {}", code)?;
-    writeln!(&mut *err_writer, "
-[exit_code] {}", code)?;
+    writeln!(
+        &mut *out_writer,
+        "
+[exit_code] {}",
+        code
+    )?;
+    writeln!(
+        &mut *err_writer,
+        "
+[exit_code] {}",
+        code
+    )?;
     out_writer.flush()?;
     err_writer.flush()?;
 
     Ok((code, out_final, err_final))
 }
 
-fn write_header<W: Write>(mut w: W, cfg: &Config, cmd: &str, args: &str, cwd: &Path, date_s: &str, time_s: &str) -> Result<()> {
+fn write_header<W: Write>(
+    mut w: W,
+    cfg: &Config,
+    cmd: &str,
+    args: &str,
+    cwd: &Path,
+    date_s: &str,
+    time_s: &str,
+) -> Result<()> {
     writeln!(w, "# lg log")?;
     writeln!(w, "cmd: {}", cmd)?;
-    if !args.is_empty() { writeln!(w, "args: {}", args)?; }
+    if !args.is_empty() {
+        writeln!(w, "args: {}", args)?;
+    }
     writeln!(w, "date: {} {}", date_s, time_s)?;
     writeln!(w, "cwd: {}", cwd.display())?;
     writeln!(w, "host: {}", *HOSTNAME)?;
@@ -540,7 +653,17 @@ fn write_header<W: Write>(mut w: W, cfg: &Config, cmd: &str, args: &str, cwd: &P
     Ok(())
 }
 
-fn write_line<W: Write>(mut w: W, stream: &str, line: &str, ts_each: bool) -> Result<()> {
+fn write_line<W: Write>(
+    mut w: W,
+    stream: &str,
+    line: &str,
+    ts_each: bool,
+    plain_lines: bool,
+) -> Result<()> {
+    if plain_lines {
+        writeln!(w, "{}", line)?;
+        return Ok(());
+    }
     if ts_each {
         let ts = Local::now().format(DEFAULT_LINE_TIME_FORMAT);
         writeln!(w, "[{}][{}] {}", ts, stream, line)?;
@@ -550,17 +673,16 @@ fn write_line<W: Write>(mut w: W, stream: &str, line: &str, ts_each: bool) -> Re
     Ok(())
 }
 
-fn open_writer(
-    cfg: &Config,
-    final_path: &Path,
-) -> Result<(Box<dyn Write + Send>, PathBuf)> {
+fn open_writer(cfg: &Config, final_path: &Path) -> Result<(Box<dyn Write + Send>, PathBuf)> {
     let boxed: Box<dyn Write + Send> = match cfg.compress {
         Compress::None => {
-            let file = File::create(&final_path).with_context(|| format!("create file {:?}", final_path))?;
+            let file = File::create(&final_path)
+                .with_context(|| format!("create file {:?}", final_path))?;
             Box::new(io::BufWriter::new(file))
         }
         Compress::Gz => {
-            let file = File::create(&final_path).with_context(|| format!("create file {:?}", final_path))?;
+            let file = File::create(&final_path)
+                .with_context(|| format!("create file {:?}", final_path))?;
             let enc = GzEncoder::new(file, Compression::default());
             Box::new(enc)
         }
