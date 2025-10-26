@@ -1,57 +1,14 @@
-lg (1.0.0-4~ppa1) noble; urgency=medium
+lg (1.0.2-1) unstable; urgency=medium
 
-  * Drop home crate; prune vendor for Cargo 1.75
+  * New upstream release 1.0.2.
 
- -- Dmitry Bykov <gearbatyan@gmail.com>  Sun, 26 Oct 2025 13:59:27 +0700
+ -- Dmitry Bykov <gearbatyan@gmail.com>  Sun, 26 Oct 2025 21:16:26 +0700
 
-lg (1.0.0-3~ppa1) noble; urgency=medium
+lg (1.0.1-1) unstable; urgency=medium
 
-  * Fix build on Rust 1.75: vendor + lock v3
+  * Release
 
- -- Dmitry Bykov <gearbatyan@gmail.com>  Sun, 26 Oct 2025 13:50:24 +0700
-
-lg (1.0.0-2~ppa1) noble; urgency=medium
-
-  * Vendor crates for offline build
-
- -- Dmitry Bykov <gearbatyan@gmail.com>  Sun, 26 Oct 2025 13:44:36 +0700
-
-lg (1.0.0-1~ppa1) noble; urgency=medium
-
-  * PPA build for Noble
-
- -- Dmitry Bykov <gearbatyan@gmail.com>  Sun, 26 Oct 2025 13:34:06 +0700
-
-lg (1.0.0-1~ppa11~ppa12) noble; urgency=medium
-
-  * PPA build for Noble
-
- -- Dmitry Bykov <gearbatyan@gmail.com>  Sun, 26 Oct 2025 13:30:01 +0700
-
-lg (1.0.0-1~ppa11~ppa11) noble; urgency=medium
-
-  * PPA build for Noble
-
- -- Dmitry Bykov <gearbatyan@gmail.com>  Sun, 26 Oct 2025 13:29:01 +0700
-
-lg (1.0.0-1~ppa11) noble; urgency=medium
-
-  * PPA build for Noble
-
- -- Lenovo <dbykov@Lenovo.>  Sun, 26 Oct 2025 13:26:55 +0700
-
-lg (1.0.1-1~ppa1) noble; urgency=medium
-
-  * Upstream 1.0.1: drop home crate to avoid edition-2024 requirement on
-    Launchpad's Cargo 1.75; add vendored offline build support.
-
- -- Dmitry Bykov <gearbatyan@gmail.com>  Sun, 26 Oct 2025 13:55:00 +0000
-
-lg (1.0.0-1) unstable; urgency=medium
-
-  * Upstream stable release 1.0.0.
-
- -- Dmitry Bykov <gearbatyan@gmail.com>  Sun, 26 Oct 2025 13:05:00 +0000
+ -- Dmitry Bykov <gearbatyan@gmail.com>  Sun, 26 Oct 2025 19:53:19 +0700
 
 lg (0.1.0-2) unstable; urgency=medium
 

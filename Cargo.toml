@@ -1,6 +1,6 @@
 [package]
 name = "lg"
-version = "1.0.1"
+version = "1.0.2"
 edition = "2021"
 description = "A tiny universal command logger. Run any command prefixed with `lg` to log its output and metadata."
 license = "MIT"

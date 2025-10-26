@@ -5,10 +5,11 @@ Launchpad builders have no network during the build step. To allow cargo to
 build offline, vendor all crates locally and ship them in the source package.
 
 Steps to refresh vendor before uploading:
+- Ensure transitive deps are compatible with Launchpad rustc (1.75). The
+  script pins indexmap to 2.2.6 automatically.
 - Run: debian/prepare-vendor.sh  # requires network locally
 - This creates debian/vendor.tar.xz
 - Build source package as usual (e.g., debian/deb-src.sh)
 
 During build, debian/rules unpacks debian/vendor.tar.xz and writes a
 .cargo/config.toml that points cargo to the vendored crates with net.offline= true.
-
