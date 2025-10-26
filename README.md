@@ -57,7 +57,7 @@ Requires standard packaging tools:
 sudo apt-get update
 sudo apt-get install -y build-essential debhelper devscripts dh-cargo rustc cargo
 dpkg-buildpackage -us -uc -b
-sudo dpkg -i ../lg_0.1.0_amd64.deb  # filename may vary
+sudo dpkg -i ../lg_1.0.0_amd64.deb  # filename may vary
 ```
 
 The package installs `/usr/bin/lg` and the man page `lg(1)`.
