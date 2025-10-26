@@ -1,3 +1,9 @@
+lg (0.1.0-2) unstable; urgency=medium
+
+  * Docs: add PPA installation instructions (ppa:batyan45/stable) in README.
+
+ -- Dmitry Bykov <gearbatyan@gmail.com>  Sun, 26 Oct 2025 11:55:00 +0000
+
 lg (0.1.0-1) unstable; urgency=medium
 
   * Initial release.

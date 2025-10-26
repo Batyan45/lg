@@ -25,6 +25,21 @@ You can change behavior via a config file at `~/.lg` (TOML). See [Configuration]
 
 ## Install
 
+### Ubuntu PPA (recommended)
+On Ubuntu and derivatives, install from the official PPA:
+
+```bash
+sudo apt-get update
+sudo add-apt-repository ppa:batyan45/stable
+sudo apt-get update
+sudo apt-get install -y lg
+```
+
+Packages are published for supported Ubuntu releases when available
+(e.g., LTS like 22.04 Jammy, 24.04 Noble). See the PPA page for build
+status and supported series:
+https://launchpad.net/~batyan45/+archive/ubuntu/stable
+
 ### Build from source
 Requirements: Rust (stable) and Cargo.
 
@@ -35,7 +50,7 @@ cargo build --release
 sudo install -Dm755 target/release/lg /usr/local/bin/lg
 ```
 
-### Debian/Ubuntu package
+### Build Debian package locally
 Requires standard packaging tools:
 
 ```bash
