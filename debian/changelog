@@ -1,3 +1,9 @@
+lg (1.1.1-1) unstable; urgency=medium
+
+  * Hotfix
+
+ -- Dmitry Bykov <gearbatyan@gmail.com>  Mon, 27 Oct 2025 10:45:05 +0700
+
 lg (1.1.0-1) unstable; urgency=medium
 
   * New upstream release 1.1.0 targeting rustc 1.75 MSRV.

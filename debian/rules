@@ -48,6 +48,10 @@ override_dh_auto_configure:
 override_dh_auto_build:
 	cargo build --release --locked --verbose
 
+override_dh_auto_install:
+	# Cargo binary already built; dh_install handles file placement.
+	true
+
 override_dh_auto_test:
 	# No tests; skip
 	true

@@ -1,6 +1,6 @@
 [package]
 name = "lg"
-version = "1.1.0"
+version = "1.1.1"
 edition = "2021"
 rust-version = "1.75"
 description = "A tiny universal command logger. Run any command prefixed with `lg` to log its output and metadata."
