@@ -1,3 +1,27 @@
+lg (1.1.0-1) unstable; urgency=medium
+
+  * New upstream release 1.1.0 targeting rustc 1.75 MSRV.
+
+ -- Dmitry Bykov <gearbatyan@gmail.com>  Mon, 27 Oct 2025 10:39:59 +0700
+
+lg (1.0.2-1ubuntu3) noble; urgency=medium
+
+  * Release
+
+ -- Dmitry Bykov <gearbatyan@gmail.com>  Sun, 26 Oct 2025 21:19:17 +0700
+
+lg (1.0.2-1ubuntu2) noble; urgency=medium
+
+  * Release
+
+ -- Dmitry Bykov <gearbatyan@gmail.com>  Sun, 26 Oct 2025 21:18:33 +0700
+
+lg (1.0.2-1ubuntu1) noble; urgency=medium
+
+  * Release
+
+ -- Dmitry Bykov <gearbatyan@gmail.com>  Sun, 26 Oct 2025 21:18:07 +0700
+
 lg (1.0.2-1) unstable; urgency=medium
 
   * New upstream release 1.0.2.
